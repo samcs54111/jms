@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:file="http://www.mulesoft.org/schema/mule/file" xmlns:jms="http://www.mulesoft.org/schema/mule/jms"
+	xmlns:http="http://www.mulesoft.org/schema/mule/http"
+	xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd
+http://www.mulesoft.org/schema/mule/jms http://www.mulesoft.org/schema/mule/jms/current/mule-jms.xsd
+http://www.mulesoft.org/schema/mule/file http://www.mulesoft.org/schema/mule/file/current/mule-file.xsd">
+	<http:listener-config name="HTTP_Listener_config" doc:name="HTTP Listener config" doc:id="f79e65ce-ea61-4f0f-8e69-a94a8ad82e99" >
+		<http:listener-connection host="0.0.0.0" port="8081" />
+	</http:listener-config>
+	<jms:config name="JMS_Config" doc:name="JMS Config" doc:id="cc2d53f0-4c37-4b81-96f9-ee2b234ea8c6" >
+		<jms:active-mq-connection username="admin" password="admin" >
+			<jms:factory-configuration brokerUrl="tcp://localhost:61616" />
+		</jms:active-mq-connection>
+	</jms:config>
+	<file:config name="File_Config" doc:name="File Config" doc:id="409dc2a1-91f5-4f4a-a871-f3514ec20f61" >
+		<file:connection workingDir="src/main/resources" />
+	</file:config>
+	<file:config name="File_Config1" doc:name="File Config" doc:id="6f319eca-8f57-481f-9cec-a5a5be829843" >
+		<file:connection workingDir="C:\Users\MAISHA-ANSHA\Desktop\File" />
+	</file:config>
+	<flow name="jms1Flow" doc:id="e8e1282f-09fa-47cd-98bc-29f1227e5028" >
+		<http:listener doc:name="Listener" doc:id="9b5a8fa7-4763-4038-b44e-aebb36374a92" config-ref="HTTP_Listener_config" path="/jms"/>
+		<jms:publish doc:name="Publish" doc:id="d60f2361-3acd-4879-a245-b7e6de6f2116" config-ref="JMS_Config" destination="nagarjun" destinationType="TOPIC"/>
+		<logger level="INFO" doc:name="Logger" doc:id="a8f82fb4-c0d5-4113-a09d-e6d76b99085e" message="#[payload]"/>
+	</flow>
+	 <!-- <flow name="jms1Flow1" doc:id="91064b36-52ac-4a94-a191-6fab87c844b3" >
+		<scheduler doc:name="Scheduler" doc:id="0cbdcc33-c574-4e90-8640-c4aedd0b8199" >
+			<scheduling-strategy >
+				<fixed-frequency frequency="20" timeUnit="SECONDS"/>
+			</scheduling-strategy>
+		</scheduler>
+		<jms:consume doc:name="Consume" doc:id="b02dc651-9d95-499f-a4d9-9de8431a0b41" config-ref="JMS_Config" destination="sam">
+		</jms:consume>
+		<logger level="INFO" doc:name="Logger" doc:id="6eba082a-5279-459f-accb-4ed5a395de57" message="process completed"/>
+	</flow> -->
+	<flow name="jms1Flow2" doc:id="f0ec0867-0dee-4824-8e78-7f74a2cb29b2" >
+		<jms:listener doc:name="On New Message" doc:id="3e8de21e-1e68-4d13-8f87-b53f782f8b50" config-ref="JMS_Config" destination="nagarjun" numberOfConsumers="1">
+			<jms:consumer-type >
+				<jms:topic-consumer />
+			</jms:consumer-type>
+		</jms:listener>
+		<file:write doc:name="Write" doc:id="020112f0-d402-4823-bd21-2ecb6c2d8c2c" config-ref="File_Config1" path="#['success-Topic-1st-' ++ (now() as String {format:'yyyy-MM-dd-hh-mm-ss'}) ++'-'++ random() ++ '.txt']"/>
+		<logger level="INFO" doc:name="Logger" doc:id="bd505431-4e28-4746-93b9-bb7b24106e59" message="processs completed "/>
+	</flow> 
+	<flow name="jms1Flow11" doc:id="9675a2ea-6eb9-4712-a612-290ed64a0b0a" >
+		<jms:listener doc:name="On New Message" doc:id="c517eacb-f37c-47f6-9007-e04959506fd5" config-ref="JMS_Config" destination="nagarjun" numberOfConsumers="1">
+			<jms:consumer-type >
+				<jms:topic-consumer />
+			</jms:consumer-type>
+		</jms:listener>
+		<file:write doc:name="Write" doc:id="4011ed25-ee27-4754-bf87-cfb6b658681c" config-ref="File_Config1" path="#['success-Topic-2nd-' ++ (now() as String {format:'yyyy-MM-dd-hh-mm-ss'}) ++'-'++ random() ++ '.txt']"/>
+		<logger level="INFO" doc:name="Logger" doc:id="2783c32a-b554-48dc-83c2-e5e8acdc6fe8" message="process completed"/>
+	</flow> 
+</mule>
